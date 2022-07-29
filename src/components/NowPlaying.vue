@@ -5,27 +5,49 @@
       class="now-playing"
       :class="getNowPlayingClass()"
     >
-      <div class="now-playing__cover">
+      <div ref="coverDiv" class="now-playing__cover">
         <img
+          ref="trackAlbum"
           :src="player.trackAlbum.image"
           :alt="player.trackTitle"
           class="now-playing__image"
         />
       </div>
       <div class="now-playing__details">
-        <h1 class="now-playing__track" v-text="player.trackTitle"></h1>
-        <h2 class="now-playing__artists" v-text="getTrackArtists"></h2>
+        <h1
+          ref="trackTitle"
+          class="now-playing__track"
+          v-text="player.trackTitle"
+        ></h1>
+        <h2
+          ref="trackArtists"
+          class="now-playing__artists"
+          v-text="getTrackArtists"
+        ></h2>
+        <progress
+          ref="progressBar"
+          max="1"
+          class="now-playing__progressBar"
+          :value="player.progressPercent"
+        ></progress>
       </div>
     </div>
     <div v-else class="now-playing" :class="getNowPlayingClass()">
-      <h1 class="now-playing__idle-heading">No music is playing 😔</h1>
+      <h1 ref="heading" class="now-playing__idle-heading">
+        No music is playing 😔
+      </h1>
+      <h2 ref="secondary" class="now-playing__idle-secondary">
+        💿 Hover your phone over an album cover to get started
+      </h2>
     </div>
   </div>
 </template>
+<script src="node_modules/colorthief/dist/color-thief.umd.js"></script>
 
 <script>
-import * as Vibrant from 'node-vibrant'
+import ColorThief from '/node_modules/colorthief/dist/color-thief.mjs'
 
+import { gsap } from 'gsap'
 import props from '@/utils/props.js'
 
 export default {
@@ -106,6 +128,7 @@ export default {
         }
 
         data = await response.json()
+
         this.playerResponse = data
       } catch (error) {
         this.handleExpiredToken()
@@ -132,23 +155,29 @@ export default {
      * Get the colour palette from the album cover.
      */
     getAlbumColours() {
-      /**
-       * No image (rare).
-       */
+      // no image exists
       if (!this.player.trackAlbum?.image) {
         return
       }
 
-      /**
-       * Run node-vibrant to get colours.
-       */
-      Vibrant.from(this.player.trackAlbum.image)
-        .quality(1)
-        .clearFilters()
-        .getPalette()
-        .then(palette => {
-          this.handleAlbumPalette(palette)
+      const colorThief = new ColorThief()
+      const img = document.querySelector('img')
+      const imageURL = img.src
+      img.crossOrigin = 'Anonymous'
+      document.querySelector('img').src = imageURL
+      img.src = imageURL
+      const handleFunc = this.handleAlbumPalette
+
+      let primaryCol
+      if (img.complete) {
+        primaryCol = colorThief.getColor(img)
+        handleFunc(primaryCol)
+      } else {
+        img.addEventListener('load', function() {
+          primaryCol = colorThief.getColor(img)
+          handleFunc(primaryCol)
         })
+      }
     },
 
     /**
@@ -183,7 +212,10 @@ export default {
         '--color-text-primary',
         this.colourPalette.text
       )
-
+      document.documentElement.style.setProperty(
+        '--color-text-alternate',
+        this.colourPalette.text === '#000000' ? '#ffffff' : '#000000'
+      )
       document.documentElement.style.setProperty(
         '--colour-background-now-playing',
         this.colourPalette.background
@@ -217,6 +249,8 @@ export default {
        * one, we don't want to update the DOM yet.
        */
       if (this.playerResponse.item?.id === this.playerData.trackId) {
+        this.playerData.progressPercent =
+          this.playerResponse.progress_ms / this.playerResponse.item.duration_ms
         return
       }
 
@@ -229,6 +263,7 @@ export default {
           artist => artist.name
         ),
         trackTitle: this.playerResponse.item.name,
+        progressPercent: 0,
         trackId: this.playerResponse.item.id,
         trackAlbum: {
           title: this.playerResponse.item.album.name,
@@ -243,22 +278,28 @@ export default {
      * - Get and store random colour combination.
      */
     handleAlbumPalette(palette) {
-      let albumColours = Object.keys(palette)
-        .filter(item => {
-          return item === null ? null : item
-        })
-        .map(colour => {
-          return {
-            text: palette[colour].getTitleTextColor(),
-            background: palette[colour].getHex()
-          }
-        })
+      const componentToHex = c => {
+        var hex = c.toString(16)
+        return hex.length == 1 ? '0' + hex : hex
+      }
+      const rgbToHex = (r, g, b) => {
+        return '#' + componentToHex(r) + componentToHex(g) + componentToHex(b)
+      }
 
-      this.swatches = albumColours
+      this.colourPalette = {
+        text:
+          palette[0] * 0.299 + palette[1] * 0.587 + palette[2] * 0.114 > 186
+            ? '#000000'
+            : '#ffffff',
+        background: rgbToHex(palette[0], palette[1], palette[2])
+      }
+      gsap.to('.now-playing', {
+        color: this.colourPalette.text,
+        backgroundColor: this.colourPalette.background,
+        duration: 1
+      })
 
-      this.colourPalette =
-        albumColours[Math.floor(Math.random() * albumColours.length)]
-
+      this.setAppColours()
       this.$nextTick(() => {
         this.setAppColours()
       })
@@ -294,6 +335,32 @@ export default {
      */
     playerData: function() {
       this.$emit('spotifyTrackUpdated', this.playerData)
+      if (this.$refs?.trackTitle)
+        gsap.fromTo(
+          [
+            this.$refs?.trackTitle,
+            this.$refs?.trackArtists,
+            this.$refs?.progressBar
+          ],
+          {
+            opacity: 0,
+            stagger: 0.5,
+            scale: 0.95
+          },
+          {
+            opacity: 1,
+            stagger: 0.5,
+            scale: 1,
+            duration: 1
+          }
+        )
+
+      gsap.to('.now-playing', {
+        color: this.colourPalette.text,
+        backgroundColor: this.colourPalette.background,
+        duration: 1
+      })
+      this.getAlbumColours()
 
       this.$nextTick(() => {
         this.getAlbumColours()
