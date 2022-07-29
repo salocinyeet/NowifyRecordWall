@@ -15,11 +15,11 @@
     </button>
 
     <p class="authorise__credit">
-      Forked from the Nowify Repoistory by @jonashcroft on
+      Forked from the Nowify repository by @jonashcroft on
       <a href="https://github.com/jonashcroft/Nowify">GitHub</a>
     </p>
     <p class="authorise__credit">
-      See this repoistory on
+      See this repository on
       <a href="https://github.com/KeshavChawla/NowifyRecordWall">GitHub</a>
     </p>
   </div>
