@@ -59,19 +59,15 @@
   &__progressBar {
     border-radius: 5px;
     width: 100%;
-    margin-top: 10px;
+    margin-top: 15px;
     height: 8px;
     overflow: hidden;
-    // border-color: var(--color-text-primary);
-    // border: 1px solid;
-    // box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
   }
+
   &__progressBar::-webkit-progress-bar {
     background-color: var(--color-text-alternate);
 
     border-radius: 5px;
-    // border-color: pink;
-    // border: 2px solid;
     overflow: hidden;
   }
   &__progressBar::-webkit-progress-value {
@@ -80,16 +76,7 @@
     border-radius: 5px;
     height: 25px;
     margin-top: -2%;
-
     transition: width 2s linear;
-    // border-color: pink;
-    // border: 2px solid;
-    // box-shadow: 1px 1px 5px 3px rgba(255, 0, 0, 0.8);
-  }
-  progress::-moz-progress-bar {
-    /* style rules */
-    // border-color: pink;
-    // border: 2px solid;
   }
 
   &--active {
