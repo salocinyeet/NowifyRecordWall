@@ -33,7 +33,12 @@
   }
 
   &--authorise {
-    background-color: var(--color-brand-spotify);
+    border-color: var(--color-brand-spotify);
     color: var(--color-text-primary);
+    border-radius: 50px;
+    width: 200px;
+  }
+  &--authorise:hover {
+    background-color: var(--color-brand-spotify);
   }
 }

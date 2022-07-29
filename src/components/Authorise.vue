@@ -1,21 +1,26 @@
 <template>
   <div class="authorise">
-    <h1 class="authorise__heading">Nowify</h1>
+    <h1 class="authorise__heading">Digital Vinyl</h1>
 
     <p class="authorise__copy">
-      Nowify is a simple Spotify 'Now Playing' screen designed for the Raspberry
-      Pi. Login with Spotify below and start playing some music!
+      Hover your phone over the album cover or place the album over the sensor
+      to start playing music.
     </p>
 
     <button
       class="authorise__button button button--authorise"
       @click="initAuthorise"
     >
-      Login with Spotify
+      Login
     </button>
 
     <p class="authorise__credit">
-      <a href="https://github.com/jonashcroft/Nowify">View on GitHub</a>
+      Forked from the Nowify Repoistory by @jonashcroft on
+      <a href="https://github.com/jonashcroft/Nowify">GitHub</a>
+    </p>
+    <p class="authorise__credit">
+      See this repoistory on
+      <a href="https://github.com/KeshavChawla/NowifyRecordWall">GitHub</a>
     </p>
   </div>
 </template>
