@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <div
+      ref="nowPlaying"
       v-if="player.playing"
       class="now-playing"
       :class="getNowPlayingClass()"
@@ -299,15 +300,30 @@ export default {
             : '#ffffff',
         background: rgbToHex(palette[0], palette[1], palette[2])
       }
-      gsap.to('.now-playing', {
-        color: this.colourPalette.text,
-        backgroundColor: this.colourPalette.background,
-        duration: 1
-      })
-
-      this.setAppColours()
+      if (this.pastBackgroundColour != this.colourPalette.background) {
+        gsap.fromTo(
+          '.now-playing',
+          {
+            color: this.pastTextColour,
+            backgroundColor: this.pastBackgroundColour
+          },
+          {
+            color: this.colourPalette.text,
+            backgroundColor: this.colourPalette.background,
+            duration: 2,
+            stagger: 0
+          }
+        )
+      }
+      if (this.pastTextColour != this.colourPalette.text) {
+        this.pastTextColour = this.colourPalette.text
+      }
+      if (this.pastBackgroundColour != this.colourPalette.background) {
+        this.pastBackgroundColour = this.colourPalette.background
+      }
+      // this.setAppColours()
       this.$nextTick(() => {
-        this.setAppColours()
+        // this.setAppColours()
       })
     },
 
@@ -325,12 +341,7 @@ export default {
         '--colour-background-shadow',
         hexColour
       )
-      console.log('hexColour: ', hexColour)
-      console.log(this.$refs.coverDiv)
-      console.log(this.$refs.coverDiv.style.filter)
-      console.log(hexColour)
       this.$refs.coverDiv.style.filter = `drop-shadow(0px 0px 5px ${hexColour})`
-      console.log(this.$refs.coverDiv.style.filter)
     },
 
     /**
