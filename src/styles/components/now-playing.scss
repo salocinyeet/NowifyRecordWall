@@ -22,13 +22,20 @@
 
   &__cover {
     max-width: 400px;
+    // filter: drop-shadow(0px 0px 5px #a198b1);
   }
 
   &__image {
-    box-shadow: 1px 1px 16px -2px rgba(0, 0, 0, 0.3);
+    // overflow: hidden;
+    // box-shadow: 1px 1px 16px -2px rgba(0, 0, 0, 0.3);
+    // filter: drop-shadow(-1px 10px 10px #a198b1);
+
     height: auto;
     max-width: 60vw;
+    --squircle-color: #e1fff2;
     width: 100%;
+    mask-image: paint(squircle);
+    --squircle-smooth: 500;
   }
 
   &__details {

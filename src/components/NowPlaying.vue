@@ -24,12 +24,6 @@
           class="now-playing__artists"
           v-text="getTrackArtists"
         ></h2>
-        <progress
-          ref="progressBar"
-          max="1"
-          class="now-playing__progressBar"
-          :value="player.progressPercent"
-        ></progress>
       </div>
     </div>
     <div v-else class="now-playing" :class="getNowPlayingClass()">
@@ -49,6 +43,12 @@ import ColorThief from '/node_modules/colorthief/dist/color-thief.mjs'
 
 import { gsap } from 'gsap'
 import props from '@/utils/props.js'
+
+if ('paintWorklet' in CSS) {
+  CSS.paintWorklet.addModule(
+    'https://www.unpkg.com/css-houdini-squircle@0.1.3/squircle.min.js'
+  )
+}
 
 export default {
   name: 'NowPlaying',
@@ -167,15 +167,21 @@ export default {
       document.querySelector('img').src = imageURL
       img.src = imageURL
       const handleFunc = this.handleAlbumPalette
+      const handleFuncSecondary = this.handleAlbumPaletteSecondary
 
       let primaryCol
+      let palletArray
       if (img.complete) {
         primaryCol = colorThief.getColor(img)
         handleFunc(primaryCol)
+        palletArray = colorThief.getPalette(img)
+        handleFuncSecondary(palletArray)
       } else {
         img.addEventListener('load', function() {
           primaryCol = colorThief.getColor(img)
           handleFunc(primaryCol)
+          palletArray = colorThief.getPalette(img)
+          handleFuncSecondary(palletArray)
         })
       }
     },
@@ -249,8 +255,8 @@ export default {
        * one, we don't want to update the DOM yet.
        */
       if (this.playerResponse.item?.id === this.playerData.trackId) {
-        this.playerData.progressPercent =
-          this.playerResponse.progress_ms / this.playerResponse.item.duration_ms
+        // this.playerData.progressPercent =
+        //   this.playerResponse.progress_ms / this.playerResponse.item.duration_ms
         return
       }
 
@@ -263,7 +269,7 @@ export default {
           artist => artist.name
         ),
         trackTitle: this.playerResponse.item.name,
-        progressPercent: 0,
+        // progressPercent: 0,
         trackId: this.playerResponse.item.id,
         trackAlbum: {
           title: this.playerResponse.item.album.name,
@@ -305,6 +311,28 @@ export default {
       })
     },
 
+    handleAlbumPaletteSecondary(palette) {
+      const componentToHex = c => {
+        var hex = c.toString(16)
+        return hex.length == 1 ? '0' + hex : hex
+      }
+      const rgbToHex = (r, g, b) => {
+        return '#' + componentToHex(r) + componentToHex(g) + componentToHex(b)
+      }
+      const colourOne = palette[1]
+      const hexColour = rgbToHex(colourOne[0], colourOne[1], colourOne[2])
+      document.documentElement.style.setProperty(
+        '--colour-background-shadow',
+        hexColour
+      )
+      console.log('hexColour: ', hexColour)
+      console.log(this.$refs.coverDiv)
+      console.log(this.$refs.coverDiv.style.filter)
+      console.log(hexColour)
+      this.$refs.coverDiv.style.filter = `drop-shadow(0px 0px 5px ${hexColour})`
+      console.log(this.$refs.coverDiv.style.filter)
+    },
+
     /**
      * Handle an expired access token from Spotify.
      */
@@ -339,8 +367,8 @@ export default {
         gsap.fromTo(
           [
             this.$refs?.trackTitle,
-            this.$refs?.trackArtists,
-            this.$refs?.progressBar
+            this.$refs?.trackArtists
+            // this.$refs?.progressBar
           ],
           {
             opacity: 0,
