@@ -45,12 +45,6 @@ import ColorThief from '/node_modules/colorthief/dist/color-thief.mjs'
 import { gsap } from 'gsap'
 import props from '@/utils/props.js'
 
-if ('paintWorklet' in CSS) {
-  CSS.paintWorklet.addModule(
-    'https://www.unpkg.com/css-houdini-squircle@0.1.3/squircle.min.js'
-  )
-}
-
 export default {
   name: 'NowPlaying',
 
