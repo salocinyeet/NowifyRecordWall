@@ -41,28 +41,34 @@
 
 <script>
 import ColorThief from '/node_modules/colorthief/dist/color-thief.mjs'
+import('css-paint-polyfill')
 
 import { gsap } from 'gsap'
 import props from '@/utils/props.js'
 ;(async function() {
-  // console.log('async function: ', CSS)
-  if (!('paintWorklet' in CSS)) {
-    //   console.log('calling paint polyfill')
-    await import('css-paint-polyfill')
-  }
+  //   // console.log('async function: ', CSS)
+  //   if (!('paintWorklet' in CSS)) {
+  //     //   console.log('calling paint polyfill')
+  //     await import('css-paint-polyfill')
+  //   }
 
   //   if ('paintWorklet' in CSS) {
   //     CSS.paintWorklet.addModule(
   //       'https://www.unpkg.com/css-houdini-squircle@0.1.3/squircle.min.js'
   //     )
   //   }
+  if ('paintWorklet' in CSS) {
+    CSS.paintWorklet.addModule(
+      'https://www.unpkg.com/css-houdini-squircle@0.1.3/squircle.min.js'
+    )
+  }
 })()
 
-if ('paintWorklet' in CSS) {
-  CSS.paintWorklet.addModule(
-    'https://www.unpkg.com/css-houdini-squircle@0.1.3/squircle.min.js'
-  )
-}
+// if ('paintWorklet' in CSS) {
+//   CSS.paintWorklet.addModule(
+//     'https://www.unpkg.com/css-houdini-squircle@0.1.3/squircle.min.js'
+//   )
+// }
 
 export default {
   name: 'NowPlaying',
