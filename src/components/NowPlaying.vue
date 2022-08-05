@@ -48,11 +48,13 @@ import props from '@/utils/props.js'
   if (!('paintWorklet' in CSS)) {
     await import('css-paint-polyfill')
   }
-
-  CSS.paintWorklet.addModule(
-    `https://www.unpkg.com/css-houdini-squircle/squircle.min.js`
-  )
 })()
+
+if ('paintWorklet' in CSS) {
+  CSS.paintWorklet.addModule(
+    'https://www.unpkg.com/css-houdini-squircle/squircle.min.js'
+  )
+}
 
 export default {
   name: 'NowPlaying',
