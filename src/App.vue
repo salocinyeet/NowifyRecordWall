@@ -11,6 +11,10 @@
   </div>
 </template>
 <script>
+import Authorise from '@/components/Authorise'
+import NowPlaying from '@/components/NowPlaying'
+
+import { getStoredAuth, setStoredAuth } from '@/utils/utils.js'
 ;(async function() {
   if (!('paintWorklet' in CSS)) {
     await import('css-paint-polyfill')
@@ -20,12 +24,6 @@
     `https://www.unpkg.com/css-houdini-squircle/squircle.min.js`
   )
 })()
-</script>
-<script>
-import Authorise from '@/components/Authorise'
-import NowPlaying from '@/components/NowPlaying'
-
-import { getStoredAuth, setStoredAuth } from '@/utils/utils.js'
 
 export default {
   name: 'App',
