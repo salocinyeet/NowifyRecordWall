@@ -62,10 +62,12 @@
     max-width: 60vw;
     width: 100%;
     // -webkit-clip-path: url('squircle.png');
-
-    --squircle-color: #e1fff2;
-    mask-image: paint(squircle);
-    --squircle-smooth: 500;
+    mask-image: paint(smooth-corners);
+    -webkit-mask-image: paint(smooth-corners);
+    --smooth-corners: 5;
+    // --squircle-color: #e1fff2;
+    // mask-image: paint(squircle);
+    // --squircle-smooth: 500;
     // border-radius: 35px;
   }
 

@@ -44,20 +44,27 @@ import ColorThief from '/node_modules/colorthief/dist/color-thief.mjs'
 // import('css-paint-polyfill')
 
 import { gsap } from 'gsap'
+// require('smooth-corners') // CommonJS
+// import 'smooth-corners' // ES Modules
+
 // import './squircle.svg'
 // import './squirclev2.svg'
 import props from '@/utils/props.js'
-;(async function() {
-  if (!('paintWorklet' in CSS)) {
-    //   console.log('calling paint polyfill')
-    await import('css-paint-polyfill')
-  }
-  if ('paintWorklet' in CSS) {
-    CSS.paintWorklet.addModule(
-      'https://www.unpkg.com/css-houdini-squircle@0.1.3/squircle.min.js'
-    )
-  }
-})()
+// ;(async function() {
+//   if (!('paintWorklet' in CSS)) {
+//     //   console.log('calling paint polyfill')
+//     await import('css-paint-polyfill')
+//   }
+//   if ('paintWorklet' in CSS) {
+//     CSS.paintWorklet.addModule(
+//       'https://www.unpkg.com/css-houdini-squircle@0.1.3/squircle.min.js'
+//     )
+//   }
+// })()
+
+// if (CSS && 'paintWorklet' in CSS) CSS.paintWorklet.addModule('/assets/paint.js')
+if (CSS && 'paintWorklet' in CSS)
+  CSS.paintWorklet.addModule('https://unpkg.com/smooth-corners')
 
 // if ('paintWorklet' in CSS) {
 //   CSS.paintWorklet.addModule(
