@@ -22,25 +22,39 @@
 
   &__cover {
     max-width: 400px;
-
+    // mask-image: url(https://i.scdn.co/image/ab67616d0000b2732e8ed79e177ff6011076f5f0);
     // filter: drop-shadow(0px 0px 5px #a198b1);
   }
 
   &__squircle-cover {
     // max-width: 60vw;
-    width: 2px;
-    height: 2px;
+    // width: 2px;
+    // height: 2px;
+    border: 2px solid red;
+    overflow: hidden;
     // width: 100%;
-    // position: relative;
-    border: 5px solid red;
+    position: relative;
+    // border: 5px solid red;
+    // mask-image: url(https://i.scdn.co/image/ab67616d0000b2732e8ed79e177ff6011076f5f0);
     // position: absolute;
+  }
+
+  &__squircle-cover2 {
+    position: absolute;
+    top: 0;
+    max-width: 60vw;
+    max-width: 400px;
+    width: 50%;
+    left: 0;
+    // overflow: hidden;
   }
   &__image {
     // overflow: hidden;
     // box-shadow: 1px 1px 16px -2px rgba(0, 0, 0, 0.3);
     // filter: drop-shadow(-1px 10px 10px #a198b1);
-    mask-image: url(/src/components/squirclev2.svg);
-    object-fit: cover;
+    // mask-image: url(http://localhost:8080/img/squirclev2.6a5ee8bc.svg);
+    // mask-image: url(https://i.scdn.co/image/ab67616d0000b2732e8ed79e177ff6011076f5f0);
+    // object-fit: cover;
 
     // z-index: 200;
 
@@ -49,9 +63,9 @@
     width: 100%;
     // -webkit-clip-path: url('squircle.png');
 
-    // --squircle-color: #e1fff2;
-    // mask-image: paint(squircle);
-    // --squircle-smooth: 500;
+    --squircle-color: #e1fff2;
+    mask-image: paint(squircle);
+    --squircle-smooth: 500;
     // border-radius: 35px;
   }
 

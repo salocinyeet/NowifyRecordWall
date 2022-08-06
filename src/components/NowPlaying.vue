@@ -13,7 +13,6 @@
           :alt="player.trackTitle"
           class="now-playing__image"
         />
-        <!-- <img src="./squircle.svg" class="squircle-cover" /> -->
       </div>
       <div class="now-playing__details">
         <h1
@@ -45,20 +44,20 @@ import ColorThief from '/node_modules/colorthief/dist/color-thief.mjs'
 // import('css-paint-polyfill')
 
 import { gsap } from 'gsap'
-import './squircle.svg'
-import './squirclev2.svg'
+// import './squircle.svg'
+// import './squirclev2.svg'
 import props from '@/utils/props.js'
-// ;(async function() {
-//   if (!('paintWorklet' in CSS)) {
-//     //   console.log('calling paint polyfill')
-//     await import('css-paint-polyfill')
-//   }
-//   if ('paintWorklet' in CSS) {
-//     CSS.paintWorklet.addModule(
-//       'https://www.unpkg.com/css-houdini-squircle@0.1.3/squircle.min.js'
-//     )
-//   }
-// })()
+;(async function() {
+  if (!('paintWorklet' in CSS)) {
+    //   console.log('calling paint polyfill')
+    await import('css-paint-polyfill')
+  }
+  if ('paintWorklet' in CSS) {
+    CSS.paintWorklet.addModule(
+      'https://www.unpkg.com/css-houdini-squircle@0.1.3/squircle.min.js'
+    )
+  }
+})()
 
 // if ('paintWorklet' in CSS) {
 //   CSS.paintWorklet.addModule(
@@ -415,7 +414,6 @@ export default {
         duration: 1
       })
       this.getAlbumColours()
-
       this.$nextTick(() => {
         this.getAlbumColours()
       })
