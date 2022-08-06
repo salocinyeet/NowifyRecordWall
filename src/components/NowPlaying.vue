@@ -46,15 +46,16 @@ import ColorThief from '/node_modules/colorthief/dist/color-thief.mjs'
 import { gsap } from 'gsap'
 // require('smooth-corners') // CommonJS
 // import 'smooth-corners' // ES Modules
+import 'css-paint-polyfill'
 
 // import './squircle.svg'
 // import './squirclev2.svg'
 import props from '@/utils/props.js'
 ;(async function() {
-  if (!('paintWorklet' in CSS)) {
-    //   console.log('calling paint polyfill')
-    await import('css-paint-polyfill')
-  }
+  // if (!('paintWorklet' in CSS)) {
+  //   //   console.log('calling paint polyfill')
+  //   await import('css-paint-polyfill')
+  // }
 
   if (CSS && 'paintWorklet' in CSS)
     CSS.paintWorklet.addModule('https://unpkg.com/smooth-corners')
