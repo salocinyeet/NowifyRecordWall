@@ -55,6 +55,9 @@ import props from '@/utils/props.js'
     //   console.log('calling paint polyfill')
     await import('css-paint-polyfill')
   }
+
+  if (CSS && 'paintWorklet' in CSS)
+    CSS.paintWorklet.addModule('https://unpkg.com/smooth-corners')
   //   if ('paintWorklet' in CSS) {
   //     CSS.paintWorklet.addModule(
   //       'https://www.unpkg.com/css-houdini-squircle@0.1.3/squircle.min.js'
