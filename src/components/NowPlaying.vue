@@ -302,6 +302,7 @@ export default {
           image: this.playerResponse.item.album.images[0].url
         }
       }
+      this.getAlbumColours()
     },
 
     /**
@@ -399,11 +400,17 @@ export default {
      */
     playerData: function() {
       this.$emit('spotifyTrackUpdated', this.playerData)
-      if (this.$refs?.trackTitle)
+      gsap.to('.now-playing', {
+        color: this.colourPalette.text,
+        backgroundColor: this.colourPalette.background,
+        duration: 2
+      })
+      if (this.$refs?.trackTitle) {
         gsap.fromTo(
           [
             this.$refs?.trackTitle,
-            this.$refs?.trackArtists
+            this.$refs?.trackArtists,
+            this.$refs?.trackAlbum
             // this.$refs?.progressBar
           ],
           {
@@ -413,20 +420,15 @@ export default {
           },
           {
             opacity: 1,
-            stagger: 0.5,
+            stagger: 0.3,
             scale: 1,
-            duration: 1
+            duration: 0.8
           }
         )
-
-      gsap.to('.now-playing', {
-        color: this.colourPalette.text,
-        backgroundColor: this.colourPalette.background,
-        duration: 1
-      })
-      this.getAlbumColours()
+      }
+      // this.getAlbumColours()
       this.$nextTick(() => {
-        this.getAlbumColours()
+        // this.getAlbumColours()
       })
     }
   }
