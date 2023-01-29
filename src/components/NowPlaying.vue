@@ -1,7 +1,6 @@
 <template>
   <div id="app">
     <div
-      ref="nowPlaying"
       v-if="player.playing"
       class="now-playing"
       :class="getNowPlayingClass()"
@@ -25,6 +24,12 @@
           class="now-playing__artists"
           v-text="getTrackArtists"
         ></h2>
+        <progress
+          ref="progressBar"
+          max="1"
+          class="now-playing__progressBar"
+          :value="player.progressPercent"
+        ></progress>
       </div>
     </div>
     <div v-else class="now-playing" :class="getNowPlayingClass()">
@@ -40,41 +45,14 @@
 <script src="node_modules/colorthief/dist/color-thief.umd.js"></script>
 
 <script>
+// import * as Vibrant from 'node-vibrant'
+// const ColorThief = require('/color-thief-2.3.2/dist/color-thief.js')
+// import { ColorThief } from '/color-thief-2.3.2/dist/color-thief.js'
+// const ColorThief = require('colorthief')
 import ColorThief from '/node_modules/colorthief/dist/color-thief.mjs'
-// import('css-paint-polyfill')
 
 import { gsap } from 'gsap'
-// require('smooth-corners') // CommonJS
-// import 'smooth-corners' // ES Modules
-// import 'css-paint-polyfill'
-
-// import './squircle.svg'
-// import './squirclev2.svg'
 import props from '@/utils/props.js'
-;(async function() {
-  if (!('paintWorklet' in CSS)) {
-    //   console.log('calling paint polyfill')
-    await import('css-paint-polyfill')
-  }
-
-  if (CSS && 'paintWorklet' in CSS)
-    CSS.paintWorklet.addModule('https://unpkg.com/smooth-corners')
-  //   if ('paintWorklet' in CSS) {
-  //     CSS.paintWorklet.addModule(
-  //       'https://www.unpkg.com/css-houdini-squircle@0.1.3/squircle.min.js'
-  //     )
-  //   }
-})()
-
-// if (CSS && 'paintWorklet' in CSS) CSS.paintWorklet.addModule('/assets/paint.js')
-// if (CSS && 'paintWorklet' in CSS)
-//   CSS.paintWorklet.addModule('https://unpkg.com/smooth-corners')
-
-// if ('paintWorklet' in CSS) {
-//   CSS.paintWorklet.addModule(
-//     'https://www.unpkg.com/css-houdini-squircle@0.1.3/squircle.min.js'
-//   )
-// }
 
 export default {
   name: 'NowPlaying',
@@ -154,6 +132,10 @@ export default {
         }
 
         data = await response.json()
+        // console.log(data)
+        // console.log(data.progress_ms)
+        // console.log(data.progress_ms / 1000)
+        // console.log(data.timestamp / 60)
 
         this.playerResponse = data
       } catch (error) {
@@ -181,35 +163,76 @@ export default {
      * Get the colour palette from the album cover.
      */
     getAlbumColours() {
-      // no image exists
+      /**
+       * No image (rare).
+       */
       if (!this.player.trackAlbum?.image) {
         return
       }
 
+      /**
+       * Run node-vibrant to get colours.
+       */
+      console.log('track album', this.player.trackAlbum)
+      // Vibrant.from(this.player.trackAlbum.image)
+      //   .quality(1)
+      //   .clearFilters()
+      //   .getPalette()
+      //   .then(palette => {
+      //     this.handleAlbumPalette(palette)
+      //   })
+      // console.log('ColorThief', ColorThief)
+
+      // const colorThief = new ColorThief()
+      // console.log('colorThief', colorThief)
+      // const img = document.querySelector('img')
+      // console.log(img)
+      // let primaryCol
+      // // Make sure image is finished loading
+      // if (img.complete) {
+      //   primaryCol = ColorThief.getColor(img)
+      // } else {
+      //   img.addEventListener('load', function() {
+      //     ColorThief.getColor(img)
+      //   })
+      // }
+
+      // const img = Promise.resolve(process.cwd(), this.player.trackAlbum)
+      // const img = document.querySelector('img')
       const colorThief = new ColorThief()
+      // const palette = colorThief.getPalette(this.$refs.trackAlbum.image)
       const img = document.querySelector('img')
+
+      console.log(img)
       const imageURL = img.src
+      let googleProxyURL =
+        'https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&refresh=2592000&url='
+
       img.crossOrigin = 'Anonymous'
-      document.querySelector('img').src = imageURL
-      img.src = imageURL
+      document.querySelector('img').src =
+        googleProxyURL + encodeURIComponent(imageURL)
+      img.src = googleProxyURL + encodeURIComponent(imageURL)
+      console.log(img)
       const handleFunc = this.handleAlbumPalette
-      const handleFuncSecondary = this.handleAlbumPaletteSecondary
 
       let primaryCol
-      let palletArray
       if (img.complete) {
+        console.log('iother case e e')
         primaryCol = colorThief.getColor(img)
-        handleFunc(primaryCol)
-        palletArray = colorThief.getPalette(img)
-        handleFuncSecondary(palletArray)
+        this.handleAlbumPalette(primaryCol)
       } else {
         img.addEventListener('load', function() {
+          console.log('in this')
+          console.log(img.complete)
           primaryCol = colorThief.getColor(img)
+          console.log(primaryCol)
           handleFunc(primaryCol)
-          palletArray = colorThief.getPalette(img)
-          handleFuncSecondary(palletArray)
         })
       }
+
+      // const primaryCol = colorThief.getColor(this.player.trackAlbum.image)
+      console.log('primaryCol', primaryCol)
+      this.handleAlbumPalette(primaryCol)
     },
 
     /**
@@ -267,6 +290,7 @@ export default {
         return
       }
 
+      console.log(this.playerResponse)
       /**
        * Player is active, but user has paused.
        */
@@ -281,28 +305,28 @@ export default {
        * one, we don't want to update the DOM yet.
        */
       if (this.playerResponse.item?.id === this.playerData.trackId) {
-        // this.playerData.progressPercent =
-        //   this.playerResponse.progress_ms / this.playerResponse.item.duration_ms
+        this.playerData.progressPercent =
+          this.playerResponse.progress_ms / this.playerResponse.item.duration_ms
         return
       }
 
       /**
        * Store the current active track.
        */
+      // console.log('duration ms', this.playerResponse.item.duration_ms)
       this.playerData = {
         playing: this.playerResponse.is_playing,
         trackArtists: this.playerResponse.item.artists.map(
           artist => artist.name
         ),
         trackTitle: this.playerResponse.item.name,
-        // progressPercent: 0,
+        progressPercent: 0,
         trackId: this.playerResponse.item.id,
         trackAlbum: {
           title: this.playerResponse.item.album.name,
           image: this.playerResponse.item.album.images[0].url
         }
       }
-      this.getAlbumColours()
     },
 
     /**
@@ -319,6 +343,27 @@ export default {
         return '#' + componentToHex(r) + componentToHex(g) + componentToHex(b)
       }
 
+      // console.log(palette)
+      // let albumColours = Object.keys(palette)
+      //   .filter(item => {
+      //     return item === null ? null : item
+      //   })
+      //   .map(colour => {
+      //     // console.log(colour)
+      //     // console.log(palette[colour].getTitleTextColor())
+      //     // console.log(palette[colour].getHex())
+      //     return {
+      //       text: palette[colour].getTitleTextColor(),
+      //       background: palette[colour].getHex()
+      //     }
+      //   })
+
+      // this.swatches = albumColours
+      // console.log(albumColours)
+      // console.log(albumColours.length)
+      // this.colourPalette = albumColours[Math.floor(albumColours.length / 2)]
+      console.log('inside handle')
+      console.log(rgbToHex(palette[0], palette[1], palette[2]))
       this.colourPalette = {
         text:
           palette[0] * 0.299 + palette[1] * 0.587 + palette[2] * 0.114 > 186
@@ -326,48 +371,16 @@ export default {
             : '#ffffff',
         background: rgbToHex(palette[0], palette[1], palette[2])
       }
-      if (this.pastBackgroundColour != this.colourPalette.background) {
-        gsap.fromTo(
-          '.now-playing',
-          {
-            color: this.pastTextColour,
-            backgroundColor: this.pastBackgroundColour
-          },
-          {
-            color: this.colourPalette.text,
-            backgroundColor: this.colourPalette.background,
-            duration: 2,
-            stagger: 0
-          }
-        )
-      }
-      if (this.pastTextColour != this.colourPalette.text) {
-        this.pastTextColour = this.colourPalette.text
-      }
-      if (this.pastBackgroundColour != this.colourPalette.background) {
-        this.pastBackgroundColour = this.colourPalette.background
-      }
-      // this.setAppColours()
-      this.$nextTick(() => {
-        // this.setAppColours()
+      gsap.to('.now-playing', {
+        color: this.colourPalette.text,
+        backgroundColor: this.colourPalette.background,
+        duration: 1
       })
-    },
 
-    handleAlbumPaletteSecondary(palette) {
-      const componentToHex = c => {
-        var hex = c.toString(16)
-        return hex.length == 1 ? '0' + hex : hex
-      }
-      const rgbToHex = (r, g, b) => {
-        return '#' + componentToHex(r) + componentToHex(g) + componentToHex(b)
-      }
-      const colourOne = palette[1]
-      const hexColour = rgbToHex(colourOne[0], colourOne[1], colourOne[2])
-      document.documentElement.style.setProperty(
-        '--colour-background-shadow',
-        hexColour
-      )
-      this.$refs.coverDiv.style.filter = `drop-shadow(0px 0px 5px ${hexColour})`
+      this.setAppColours()
+      this.$nextTick(() => {
+        this.setAppColours()
+      })
     },
 
     /**
@@ -400,98 +413,33 @@ export default {
      */
     playerData: function() {
       this.$emit('spotifyTrackUpdated', this.playerData)
+      console.log('the track has changed')
+      gsap.fromTo(
+        [this.$refs.trackTitle, this.$refs.trackArtists],
+        {
+          autoAlpha: 0,
+          stagger: 0.5,
+          scale: 0.95
+          // duration: 2
+        },
+        {
+          autoAlpha: 1,
+          stagger: 0.5,
+          scale: 1,
+          duration: 1
+        }
+      )
       gsap.to('.now-playing', {
         color: this.colourPalette.text,
         backgroundColor: this.colourPalette.background,
-        duration: 2
+        duration: 1
       })
-      if (this.$refs?.trackTitle) {
-        gsap.fromTo(
-          [
-            this.$refs?.trackTitle,
-            this.$refs?.trackArtists,
-            this.$refs?.trackAlbum
-            // this.$refs?.progressBar
-          ],
-          {
-            opacity: 0,
-            stagger: 0.5,
-            scale: 0.95
-          },
-          {
-            opacity: 1,
-            stagger: 0.3,
-            scale: 1,
-            duration: 0.8
-          }
-        )
-      }
-      // this.getAlbumColours()
+
       this.$nextTick(() => {
-        // this.getAlbumColours()
+        this.getAlbumColours()
       })
     }
   }
-}
-const drawSquircle = (e, i, t, r, l, h) => {
-  const s = h,
-    o = l / 2
-  e.beginPath(),
-    e.lineTo(t, o),
-    e.lineTo(i.width - t, o),
-    e.bezierCurveTo(i.width - t / r, o, i.width - o, t / r, i.width - o, t),
-    e.lineTo(i.width - o, i.height - t),
-    e.bezierCurveTo(
-      i.width - o,
-      i.height - t / r,
-      i.width - t / r,
-      i.height - o,
-      i.width - t,
-      i.height - o
-    ),
-    e.lineTo(t, i.height - o),
-    e.bezierCurveTo(t / r, i.height - o, o, i.height - t / r, o, i.height - t),
-    e.lineTo(o, t),
-    e.bezierCurveTo(o, t / r, t / r, o, t, o),
-    e.closePath(),
-    l
-      ? ((e.strokeStyle = s), (e.lineWidth = l), e.stroke())
-      : ((e.fillStyle = s), e.fill())
-}
-if ('undefined' != typeof registerPaint) {
-  class e {
-    static get contextOptions() {
-      return { alpha: !0 }
-    }
-    static get inputProperties() {
-      return [
-        '--squircle-radius',
-        '--squircle-smooth',
-        '--squircle-outline',
-        '--squircle-fill',
-        '--squircle-ratio'
-      ]
-    }
-    paint(e, i, t) {
-      const r = t.get('--squircle-ratio'),
-        l = parseFloat(r) ? parseFloat(r) : 1.8,
-        h = parseFloat(10 * t.get('--squircle-smooth')),
-        s = parseInt(t.get('--squircle-radius'), 10) * l,
-        o = parseFloat(t.get('--squircle-outline'), 10),
-        a = t
-          .get('--squircle-fill')
-          .toString()
-          .replace(/\s/g, ''),
-        u = () =>
-          void 0 !== t.get('--squircle-smooth')[0] ? (0 === h ? 1 : h) : 10,
-        n = () => o || 0,
-        c = () => a || '#f45'
-      s < i.width / 2 && s < i.height / 2
-        ? drawSquircle(e, i, s, u(), n(), c())
-        : drawSquircle(e, i, Math.min(i.width / 2, i.height / 2), u(), n(), c())
-    }
-  }
-  registerPaint('squircle', e)
 }
 </script>
 
